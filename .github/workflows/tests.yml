@@ -1,0 +1,57 @@
+name: Run Playwright Tests with .NET Backend Register API Request
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: ⬇️ Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🧱 Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: 📦 Restore and build .NET backend
+      working-directory: ./SimpleApp
+      run: |
+        dotnet restore
+        dotnet build --configuration Release
+
+    - name: ▶️ Start backend in background
+      working-directory: ./SimpleApp
+      run: dotnet run --urls "http://localhost:54587" &
+
+    - name: ⏳ Wait for backend to be ready
+      run: |
+        echo "Waiting for backend to start..."
+        sleep 5
+        curl --retry 5 --retry-connrefused --retry-delay 2 http://localhost:54587 || exit 1
+
+    - name: ⚙️ Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: 📦 Install Playwright and dependencies
+      working-directory: ./SimpleApp_Playwright
+      run: |
+        npm install
+        chmod +x ./node_modules/.bin/playwright
+        npx playwright install chromium
+
+    - name: 🧪 Run Playwright tests
+      working-directory: ./SimpleApp_Playwright
+      run: npm run test
+
+    - name: 📦 Zip Playwright HTML report
+      if: always()
+      working-directory: ./SimpleApp_Playwright
+      run: zip -r playwright-report.zip playwright-report

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register User</h2>
+    <form id="registerForm">
+        <input type="text" id="name" placeholder="Name" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Register</button>
+    </form>
+    <p id="result" style="color: red;"></p>
+
+    <script>
+        function isValidPassword(password) {
+            return password.length >= 6 &&
+                /[A-Z]/.test(password) &&
+                /[a-z]/.test(password) &&
+                /\d/.test(password);
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const resultField = document.getElementById('result');
+            resultField.style.color = "red";
+
+            if (name.length < 6) {
+                resultField.innerText = "Name must be at least 6 characters long.";
+                return;
+            }
+
+            if (!isValidPassword(password)) {
+                resultField.innerText = "Password must be at least 6 characters long and include uppercase, lowercase, and a number.";
+                return;
+            }
+
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, password })
+            });
+
+            const result = await res.json();
+            resultField.style.color = res.ok ? "green" : "red";
+            resultField.innerText = res.ok ? result.message : 'Error: ' + result.message;
+        });
+    </script>
+</body>
+</html>

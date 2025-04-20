@@ -1,0 +1,20 @@
+
+{
+  "name": "simpleapp_playwright",
+  "version": "1.0.0",
+  "description": "Playwright UI and API tests for SimpleApp (.NET backend)",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test tests/register-ui.spec.ts",
+    "test:api": "playwright test tests/register-api.spec.ts",
+    "report": "playwright show-report",
+    "install:playwright": "playwright install --with-deps"
+  },
+  "author": "Ramiz Zaketović",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}
